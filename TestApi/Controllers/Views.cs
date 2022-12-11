@@ -19,9 +19,9 @@ namespace TestApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserInfo()
+        public IActionResult GetUserInfo()
         {
-            return Ok(dbContext.UserInfo.ToListAsync());
+            return Ok(dbContext.UserInfo.ToList());
         }
 
         [HttpPost]
@@ -42,8 +42,57 @@ namespace TestApi.Controllers
             await dbContext.UserInfo.AddAsync(contacts);
             await dbContext.SaveChangesAsync();
             return Ok(contacts);
+        }
 
+        [HttpPut]
+        [Route("{id:guid}")]
+        public async Task<IActionResult> UpdateContact([FromRoute] Guid id, updateInfo update)
+        {
 
+            var model = dbContext.UserInfo.Find(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+            model.Name = update.Name;
+            model.PhoneNumber = update.PhoneNumber;
+            model.PostalCode = update.PostalCode;
+            model.City = update.City;   
+            model.Region = update.Region;
+            model.Email = update.Email;
+            model.Address = update.Address;
+
+            await dbContext.SaveChangesAsync();
+            return Ok(model);
+
+        }
+
+        [HttpGet]
+        [Route("{id:guid}")]
+        public IActionResult GetUserInformation([FromRoute] Guid id)
+        {
+            var userInfo = dbContext.UserInfo.Find(id);
+            if (userInfo == null)
+            {
+                return NotFound();
+            }
+            return Ok(userInfo);
+        }
+
+        [HttpDelete]
+        [Route("{id:guid}")]
+
+        public async Task<ActionResult> DeleteUserFromId([FromRoute] Guid id)
+        {
+            var getInfo = dbContext.UserInfo.Find(id);
+            if (getInfo == null)
+            {
+                return NotFound();
+            }
+            dbContext.Remove(getInfo);
+            await dbContext.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }
